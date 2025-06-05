@@ -1,0 +1,26 @@
+{
+  "name": "nim_nama_uasgis2425",
+  "version": "1.0.0",
+  "description": "Aplikasi WebGIS UAS 2024/2025 - Sistem Informasi Geografis Dasar",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:studio": "npx prisma studio"
+  },
+  "keywords": ["webgis", "leaflet", "express", "prisma"],
+  "author": "[NIM] [NAMA]",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "@prisma/client": "^5.6.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.6.0",
+    "nodemon": "^3.0.1"
+  }
+}

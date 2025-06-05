@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <!-- [NIM] [NAMA] - UAS WebGIS 2024/2425 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS UAS 2024/2025 - [NIM] [NAMA ANDA]</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Memuat data...</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Panel Kontrol -->
+        <div class="control-panel">
+            <!-- Search & Filter Section -->
+            <div class="section search-section">
+                <h3>🔍 Pencarian & Filter</h3>
+                <div class="input-group">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau deskripsi...">
+                    <button onclick="loadSpatialData()" class="btn-search">
+                        <span>🔍</span>
+                    </button>
+                </div>
+                <select id="categoryFilter">
+                    <option value="all">📋 Semua Kategori</option>
+                </select>
+                <select id="typeFilter">
+                    <option value="all">🎯 Semua Tipe</option>
+                    <option value="point">📍 Point</option>
+                    <option value="line">📏 Line</option>
+                    <option value="polygon">⬛ Polygon</option>
+                </select>
+                <button onclick="loadSpatialData()" class="btn-primary full-width">
+                    Tampilkan Data
+                </button>
+            </div>
+
+            <!-- Drawing Mode Section -->
+            <div class="section mode-section">
+                <h3>✏️ Mode Drawing</h3>
+                <div class="mode-buttons">
+                    <button id="pointMode" onclick="setDrawingMode('point')" class="mode-btn">
+                        📍 Point
+                    </button>
+                    <button id="lineMode" onclick="setDrawingMode('line')" class="mode-btn">
+                        📏 Line
+                    </button>
+                    <button id="polygonMode" onclick="setDrawingMode('polygon')" class="mode-btn">
+                        ⬛ Polygon
+                    </button>
+                    <button id="viewMode" onclick="setDrawingMode('view')" class="mode-btn active">
+                        👁️ View
+                    </button>
+                </div>
+            </div>
+
+            <!-- Finish Drawing Section -->
+            <div class="section finish-section" id="finishSection" style="display: none;">
+                <h3>✅ Kontrol Drawing</h3>
+                <div class="drawing-status" id="drawingStatusContainer">
+                    <div class="status-indicator" id="statusIndicator">
+                        <span class="status-icon">⏳</span>
+                        <span id="drawingStatus">Siap untuk drawing</span>
+                    </div>
+                    <div class="point-counter">
+                        <span class="counter-icon">📍</span>
+                        <span id="pointCount">Titik: 0</span>
+                    </div>
+                </div>
+                
+                <div class="finish-buttons">
+                    <button id="finishBtn" onclick="finishDrawing()" class="btn-success" disabled>
+                        ✅ Selesai
+                    </button>
+                    <button id="cancelBtn" onclick="cancelDrawing()" class="btn-danger">
+                        ❌ Batal
+                    </button>
+                </div>
+                
+                <div class="drawing-help">
+                    <small>
+                        💡 <strong>Tips:</strong><br>
+                        • Klik di peta untuk menambah titik<br>
+                        • Gunakan tombol <strong>Selesai</strong> untuk menyimpan<br>
+                        • Tekan <kbd>Enter</kbd> untuk selesai<br>
+                        • Tekan <kbd>Esc</kbd> untuk batal
+                    </small>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="section stats-section">
+                <h3>📊 Statistik Data</h3>
+                <div id="statsContainer">
+                    <div class="stat-item">
+                        <span class="stat-icon">📊</span>
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value" id="totalData">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">📍</span>
+                        <span class="stat-label">Point:</span>
+                        <span class="stat-value" id="pointData">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">📏</span>
+                        <span class="stat-label">Line:</span>
+                        <span class="stat-value" id="lineData">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">⬛</span>
+                        <span class="stat-label">Polygon:</span>
+                        <span class="stat-value" id="polygonData">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Map Controls Overlay -->
+            <div class="map-controls">
+                <button onclick="resetMapView()" class="map-control-btn" title="Reset View">
+                    🏠
+                </button>
+                <button onclick="toggleFullscreen()" class="map-control-btn" title="Toggle Fullscreen">
+                    ⛶
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Form Panel -->
+    <div id="formPanel" class="form-panel" style="display: none;">
+        <div class="form-header">
+            <h3 id="formTitle">Tambah Data Baru</h3>
+            <button type="button" class="close-btn" onclick="hideFormPanel()">✕</button>
+        </div>
+        
+        <form id="spatialForm">
+            <input type="hidden" id="dataId">
+            
+            <div class="form-group">
+                <label for="nama">
+                    <span class="required">*</span> Nama:
+                </label>
+                <input type="text" id="nama" required maxlength="255" 
+                       placeholder="Masukkan nama lokasi...">
+            </div>
+            
+            <div class="form-group">
+                <label for="kategori">
+                    <span class="required">*</span> Kategori:
+                </label>
+                <input type="text" id="kategori" required maxlength="100" 
+                       placeholder="Contoh: Rumah, Sekolah, Jalan...">
+            </div>
+            
+            <div class="form-group">
+                <label for="deskripsi">Deskripsi:</label>
+                <textarea id="deskripsi" rows="3" maxlength="1000"
+                          placeholder="Deskripsi tambahan (opsional)..."></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    💾 Simpan
+                </button>
+                <button type="button" onclick="hideFormPanel()" class="btn-secondary">
+                    ❌ Batal
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;">
+        <div class="toast-content">
+            <span class="toast-icon" id="toastIcon">ℹ️</span>
+            <span class="toast-message" id="toastMessage">Pesan</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>

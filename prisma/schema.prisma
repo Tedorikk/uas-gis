@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model SpatialData {
+  id          Int      @id @default(autoincrement())
+  nama        String   @db.VarChar(255)
+  kategori    String   @db.VarChar(100)
+  deskripsi   String?  @db.Text
+  tipe_geom   String   @db.VarChar(20) // 'point', 'line', 'polygon'
+  koordinat   Json     // Menyimpan koordinat dalam format JSON
+  latitude    Float?   @db.Double // Untuk point data
+  longitude   Float?   @db.Double // Untuk point data
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("spatial_data")
+  @@index([kategori])
+  @@index([tipe_geom])
+  @@index([nama])
+}
