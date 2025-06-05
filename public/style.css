@@ -648,6 +648,30 @@ input:focus, select:focus, textarea:focus {
     background: #a8a8a8;
 }
 
+  .data-section {
+    padding: 20px; /* memberi jarak dalam section */
+    border-radius: 8px; /* opsional agar sudut membulat */
+  }
+
+  /* Mengatur jarak antar tombol */
+  .data-section button {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px; /* jarak antar tombol */
+    padding: 12px 0;
+    background-color: #0056b3; /* warna biru tombol */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Hover effect untuk tombol */
+  .data-section button:hover {
+    background-color: #003d80;
+  }
+
 /* Print Styles */
 @media print {
     .control-panel,

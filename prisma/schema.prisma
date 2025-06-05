@@ -7,20 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model SpatialData {
-  id          Int      @id @default(autoincrement())
-  nama        String   @db.VarChar(255)
-  kategori    String   @db.VarChar(100)
-  deskripsi   String?  @db.Text
-  tipe_geom   String   @db.VarChar(20) // 'point', 'line', 'polygon'
-  koordinat   Json     // Menyimpan koordinat dalam format JSON
-  latitude    Float?   @db.Double // Untuk point data
-  longitude   Float?   @db.Double // Untuk point data
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model kk {
+  id         Int                @id @default(autoincrement())
+  no_kk      String
+  created_at DateTime          @default(now())
+  updated_at DateTime          @updatedAt
+  pin        pin[]             // relasi satu ke banyak dengan pin
+  anggota_keluarga anggota_keluarga[] // relasi satu ke banyak
+}
 
-  @@map("spatial_data")
-  @@index([kategori])
-  @@index([tipe_geom])
-  @@index([nama])
+model pin {
+  id         Int       @id @default(autoincrement())
+  id_kk      Int
+  alamat     String
+  koordinat  Json
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  kk         kk        @relation(fields: [id_kk], references: [id])
+}
+
+model anggota_keluarga {
+  id            Int      @id @default(autoincrement())
+  id_kk         Int
+  nama          String
+  NIK           Int
+  jenis_kelamin JenisKelamin
+  tempat_lahir  String
+  tgl_lahir     DateTime
+  agama         Agama
+  status        StatusPerkawinan
+  hubungan      String
+  pendidikan    String
+  pekerjaan     String
+
+  kk            kk       @relation(fields: [id_kk], references: [id])
+}
+
+// ENUM DEFINITIONS
+
+enum JenisKelamin {
+  P
+  L
+}
+
+enum Agama {
+  Islam
+  Katolik
+  Kristen_Protestan
+  Buddha
+  KongHuChu
+  Hindu
+}
+
+enum StatusPerkawinan {
+  kawin
+  belum_kawin
+  cerai_hidup
+  cerai_mati
 }
