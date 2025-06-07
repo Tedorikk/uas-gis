@@ -37,7 +37,7 @@ model anggota_keluarga {
   tgl_lahir     DateTime
   agama         Agama
   status        StatusPerkawinan
-  hubungan      String
+  hubungan      Hubungan
   pendidikan    String
   pekerjaan     String
 
@@ -65,4 +65,10 @@ enum StatusPerkawinan {
   belum_kawin
   cerai_hidup
   cerai_mati
+}
+
+enum Hubungan {
+  Ayah
+  Ibu
+  Anak
 }
