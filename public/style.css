@@ -690,3 +690,13 @@ input:focus, select:focus, textarea:focus {
         height: 500px !important;
     }
 }
+
+.modal-xl {
+  max-height: 90vh; /* maksimal 90% viewport height */
+}
+
+/* Buat modal body scrollable dengan tinggi terbatas */
+.modal-body {
+  max-height: 75vh; /* sesuaikan tinggi scroll */
+  overflow-y: auto;
+}

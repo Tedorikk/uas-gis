@@ -878,6 +878,175 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000);
 
+
+// anggota keluarga menu
+
+function bukaModalAnggota() {
+  document.getElementById('anggotaModal').style.display = 'block';
+  document.getElementById('anggotaFrame').src = '/anggota/index.php';
+}
+function tutupModalAnggota() {
+  document.getElementById('anggotaModal').style.display = 'none';
+  document.getElementById('anggotaFrame').src = '';
+}
+
+// tambah baris untuk anggota keluarga
+let anggotaIndex = 1;
+
+function tambahAnggota() {
+  const tbody = document.getElementById("anggotaTbody");
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${anggotaIndex++}</td>
+    <td><input type="text" class="form-control" name="no_kk"></td>
+    <td><input type="text" class="form-control" name="nama"></td>
+    <td><input type="text" class="form-control" name="nik"></td>
+    <td>
+      <select class="form-select" name="jk">
+        <option value="">Pilih</option>
+        <option value="L">L</option>
+        <option value="P">P</option>
+      </select>
+    </td>
+    <td><input type="text" class="form-control" name="tempat_lahir"></td>
+    <td><input type="date" class="form-control" name="tgl_lahir"></td>
+
+    <td>
+        <select name="Agama">
+            <option value="Islam">Islam</option>
+            <option value="Katolik">Katolik</option>
+            <option value="Kristen_Protestan">Kristen Protestan</option>
+            <option value="Buddha">Buddha</option>
+            <option value="KongHuChu">Kong Hu Chu</option>
+            <option value="Hindu">Hindu</option>
+        </select>
+    </td>
+
+    <td>
+        <select name="Status">
+            <option value="kawin">Kawin</option>
+            <option value="belum_kawin">Belum Kawin</option>
+            <option value="cerai_hidup">Cerai Hidup</option>
+            <option value="cerai_mati">Cerai Mati</option>
+        </select>
+    </td>
+    <td>
+        <select name="Hubungan">
+            <option value="ayah">Ayah</option>
+            <option value="ibu">Ibu</option>
+            <option value="anak">Anak</option>
+        </select>
+    </td>
+    <td><input type="text" class="form-control" name="pendidikan"></td>
+    <td><input type="text" class="form-control" name="pekerjaan"></td>
+    <td><button class="btn btn-primary btn-sm" onclick="simpanBarisIni(this)">💾</button></td>
+  `;
+
+  tbody.appendChild(row);
+}
+
+function simpanBarisIni(button) {
+  const row = button.closest("tr");
+  const inputs = row.querySelectorAll("input, select");
+
+  const data = {};
+  inputs.forEach((input) => {
+    data[input.name] = input.value;
+  });
+
+  console.log("Data disimpan:", data);
+
+  fetch('http://localhost/anggota/save_anggota.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(response => {
+    if (response.status === 'success') {
+      alert('Data berhasil disimpan!');
+      // Set input jadi readonly & disabled setelah berhasil simpan
+      inputs.forEach((input) => {
+        input.setAttribute("readonly", true);
+        input.setAttribute("disabled", true);
+      });
+      button.disabled = true;
+    } else {
+      alert('Gagal simpan: ' + response.message);
+    }
+  })
+  .catch(err => {
+    console.error('Error:', err);
+    alert('Terjadi kesalahan saat menyimpan data.');
+  });
+}
+
+
+function loadDataAnggota() {
+  fetch('http://localhost/anggota/anggota_api.php')
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('anggotaTbody');
+      tbody.innerHTML = '';
+      data.forEach((item, index) => {
+        const row = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.no_kk}</td>
+            <td>${item.nama}</td>
+            <td>${item.NIK}</td>
+            <td>${item.jenis_kelamin}</td>
+            <td>${item.tempat_lahir}</td>
+            <td>${item.tgl_lahir}</td>
+            <td>${item.agama}</td>
+            <td>${item.status}</td>
+            <td>${item.hubungan}</td>
+            <td>${item.pendidikan}</td>
+            <td>${item.pekerjaan}</td>
+            <td>
+              <button onclick="editAnggota(${item.id})">Edit</button>
+              <button onclick="hapusAnggota(${item.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+    });
+}
+
+function editAnggota(id) {
+  fetch('http://localhost/anggota/anggota_api.php?id=' + id)
+    .then(res => res.json())
+    .then(data => {
+      const namaBaru = prompt("Edit Nama:", data.nama);
+      const nikBaru = prompt("Edit NIK:", data.NIK);
+
+      if (namaBaru === null || nikBaru === null) return; // Cancel
+
+      const formData = new FormData();
+      formData.append('id', id);
+      formData.append('nama', namaBaru);
+      formData.append('NIK', nikBaru);
+      formData.append('_method', 'PUT'); // untuk simulasi PUT jika diperlukan
+
+      fetch('http://localhost/anggota/anggota_api.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.text())
+      .then(() => loadDataAnggota());
+    });
+}
+
+function hapusAnggota(id) {
+  if (!confirm('Yakin hapus data ini?')) return;
+  fetch('http://localhost/anggota/anggota_api.php?delete=' + id, { method: 'GET' })
+    .then(res => res.text())
+    .then(() => loadDataAnggota());
+}
+
+
 // Console info
 console.log('WebGIS UAS 2024/2025 - Aplikasi berhasil dimuat');
 console.log('Keyboard shortcuts:');

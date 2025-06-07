@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_uas_sigd"; // Ganti sesuai database Anda
+$db   = "db_uas_gis"; // Ganti sesuai database Anda
 
 $conn = new mysqli($host, $user, $pass, $db);
 
